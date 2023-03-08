@@ -16,16 +16,17 @@ package oauth
 
 import (
 	"encoding/json"
-	"github.com/greenpau/go-authcrunch/pkg/authn/enums/operator"
-	"github.com/greenpau/go-authcrunch/pkg/authn/icons"
-	"github.com/greenpau/go-authcrunch/pkg/errors"
-	"github.com/greenpau/go-authcrunch/pkg/requests"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/greenpau/go-authcrunch/pkg/authn/enums/operator"
+	"github.com/greenpau/go-authcrunch/pkg/authn/icons"
+	"github.com/greenpau/go-authcrunch/pkg/errors"
+	"github.com/greenpau/go-authcrunch/pkg/requests"
+	"go.uber.org/zap"
 )
 
 const (
@@ -68,6 +69,7 @@ type IdentityProvider struct {
 	requiredTokenFields    map[string]interface{}
 	scopeMap               map[string]interface{}
 	userInfoFields         map[string]interface{}
+	userInfoRolesFieldName string
 	// state stores cached state IDs
 	state         *stateManager
 	logger        *zap.Logger
@@ -225,6 +227,12 @@ func (b *IdentityProvider) Configure() error {
 	b.userInfoFields = make(map[string]interface{})
 	for _, fieldName := range b.config.UserInfoFields {
 		b.userInfoFields[fieldName] = true
+	}
+
+	if b.config.UserInfoRolesFieldName != "" {
+		b.userInfoRolesFieldName = b.config.UserInfoRolesFieldName
+	} else {
+		b.userInfoRolesFieldName = "roles"
 	}
 
 	// Configure user group filters, if any.
